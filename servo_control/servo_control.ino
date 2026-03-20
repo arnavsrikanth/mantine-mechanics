@@ -40,7 +40,7 @@ struct IMU_data {
 void setup() {
   Serial.begin(9600);
   driver.begin();
-  driver.setPWMFreq(FREQUENCY);  // Analog servos run at ~60 Hz updates
+  driver.setPWMFreq(FREQUENCY);  // Analog servos run at ~50 Hz updates
 
   /* Initialise the sensor */
   if (!bno.begin()) {
@@ -58,7 +58,7 @@ void loop() {
 
   static unsigned long last = 0;  // keeps track of time and is preserved through looping
 
-  if (millis() - last >= 10) {  // 100 Hz loop
+  if (millis() - last >= 20) {  // 50 Hz loop
     last = millis();
 
     float measurement = read_imu();
