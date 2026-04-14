@@ -1,19 +1,22 @@
 #include <Wire.h>
 #include <Adafruit_INA219.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
 
+
+// Declaring all devices
 Adafruit_INA219 ina219;
 
+// Declare variables
+
+// Power consumption
 double total_mAh = 0.0;
 float previous_mA = 0.0;
 unsigned long last_micros = 0;
 
 void setup() {
-  Serial.begin(115200);
+  // put your setup code here, to run once:
   
-  // Setup INA219 and calibrate
+  // INA219 setup code
+  Serial.begin(115200);
   if (!ina219.begin()) {
     Serial.println("INA219 not found!");
     while (1);
@@ -27,20 +30,12 @@ void setup() {
   previous_mA = ina219.getCurrent_mA();
   last_micros = micros();
 
-  // Setup BNO055 and calibrate
-  if(!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("BNO055 not found!");
-    while(1);
-  }
-  
-  delay(1000);
-    
-  bno.setExtCrystalUse(true);
+
+
 }
 
 void loop() {
+  // INA219 loop code
   unsigned long current_micros = micros();
   unsigned long interval = current_micros - last_micros;
 
@@ -62,7 +57,13 @@ void loop() {
     previous_mA = current_mA;
     last_micros = current_micros;
 
+    sensors_event_t event; 
+    bno.getEvent(&event);
+
     // Debug output
     Serial.printf("Current: %.2f mA | Consumed: %.5f mAh\n", current_mA, total_mAh);
+
+
   }
+
 }
