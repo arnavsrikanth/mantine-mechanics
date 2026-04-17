@@ -17,6 +17,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
 const int distal_L = 0;  // BLUE motor
 const int proximal_L = 1;
+int pulseWidth(int angle, bool color = true);
 
 void setup() {
   // put your setup code here, to run once:
@@ -24,35 +25,34 @@ void setup() {
   driver.begin();
   driver.setPWMFreq(FREQUENCY);  // Analog servos run at ~50 Hz updates
   driver.setPWM(proximal_L, 0, pulseWidth(90));
-  driver.setPWM(distal_L,0,pulseWidth(90,false))
+  driver.setPWM(distal_L,0,pulseWidth(90,false));
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  for (float i = 0; i <90; i++){
-    apply_motor(i);
-    delay(20);
-  }
-  driver.setPWM(distal_L,0,pulseWidth(45,false));
-  driver.setPWM(proximal_L,0,pulseWidth(0));
-  driver.setPWM(distal_L,0,pulseWidth(135,false));
-  driver.setPWM(proximal_L,0,pulseWidth(90));
-    driver.setPWM(distal_L,0,pulseWidth(90,false));
+  // for (float i = -90; i <90; i++){
+  //   apply_motor(i);
+  //   delay(100);
+  // }
+  // driver.setPWM(distal_L,0,pulseWidth(45,false));
+  // driver.setPWM(proximal_L,0,pulseWidth(0));
+  // driver.setPWM(distal_L,0,pulseWidth(135,false));
+  // driver.setPWM(proximal_L,0,pulseWidth(90));
+  //   driver.setPWM(distal_L,0,pulseWidth(90,false));
+  apply_motor(-90);
+  delay(1000);
+  apply_motor(0);
+  delay(500);
+  apply_motor(90);
+  delay(1000);
+  apply_motor(0);
+  delay(500);
 }
 
-void apply_motor(float output) {
-  int offset = constrain(output, -90, 90);
-  Serial.print("Setting motor to: ");
-  Serial.println(90+offset);
-  driver.setPWM(proximal_L,0,pulseWidth(90+offset));
-  driver.setPWM(distal_L,0,pulseWidth(90+offset/2,false));
-  //proximal_R.write(90-pwm);
-}
-
-int pulseWidth(int angle, bool color = true) {
+int pulseWidth(int angle, bool color) {
   int max_width;
-  int min_width
-  if (bool) {
+  int min_width;
+  if (color) {
     min_width = BLACK_MIN_PULSE_WIDTH;
     max_width = BLACK_MAX_PULSE_WIDTH;
   }
@@ -63,6 +63,15 @@ int pulseWidth(int angle, bool color = true) {
   int pulse_wide, analog_value;
   pulse_wide = map(angle, 0, 180, min_width, max_width);
   analog_value = int(float(pulse_wide) / 1000000 * FREQUENCY * 4096);
-  Serial.println(analog_value);
+  //Serial.println(analog_value);
   return analog_value;
+}
+
+void apply_motor(float output) {
+  int offset = constrain(output, -90, 90);
+  Serial.print("Setting motor to: ");
+  Serial.println(90+offset);
+  driver.setPWM(proximal_L,0,pulseWidth(90+offset));
+  driver.setPWM(distal_L,0,pulseWidth(90+offset,false));
+  //proximal_R.write(90-pwm);
 }
