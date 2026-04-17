@@ -46,6 +46,9 @@ SoftwareSerial maestroSerial(10, 11);
 #define BLUE_MAX_ANGLE 145
 // Blue servos go from 850-2350
 
+int flipped[4] = { 1, 1, -1, -1 };
+
+
 /* Next, create a Maestro object using the serial port. 
 Uncomment one of MicroMaestro or MiniMaestro below depending 
 on which one you have. */
@@ -105,7 +108,8 @@ void loop() {
   // delay(500);
   // motor_limit(0);
   // delay(2000);
-  motor_limit(1);
+  //motor_limit(1);
+  flap_wings();
 }
 
 /**
@@ -126,8 +130,10 @@ void apply_motor(int channel, float angle) {
     max_angle = BLUE_MAX_ANGLE;
   }
   int pulse_width;
-  pulse_width = map(angle, 0, max_angle, min_width, max_width);
-  Serial.println(pulse_width);
+  float angle_adjusted = max_angle / 2.0 + angle * flipped[channel];
+  pulse_width = map(angle_adjusted, 0, max_angle, min_width, max_width);
+  Serial.print(pulse_width);
+  Serial.print(", ");
   pulse_width = constrain(pulse_width, 0, 16383);  // constrain to max values of maestro
   maestro.setTarget(channel, 4 * pulse_width);     // target is in units of quarter-microseconds
 }
@@ -148,5 +154,24 @@ void motor_limit(int channel) {
     Serial.println(i);
     maestro.setTarget(channel, 100 * i);
     delay(10);
+  }
+}
+
+void flap_wings() {
+  for (float i = -45; i <= 45; i++) {
+    apply_motor(0, i);
+    apply_motor(1, i);
+    apply_motor(2, i);
+    apply_motor(3, i);
+    delay(10);
+    Serial.println("");
+  }
+  for (float i = 45; i >= -45; i--) {
+    apply_motor(0, i);
+    apply_motor(1, i);
+    apply_motor(2, i);
+    apply_motor(3, i);
+    delay(10);
+    Serial.println("");
   }
 }
