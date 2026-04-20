@@ -5,11 +5,27 @@
 #include <Adafruit_BNO055.h>
 #include <Adafruit_INA219.h>
 
+#include <PololuMaestro.h>
+#include <math.h>
+
 // REPLACE WITH YOUR RECEIVER'S MAC ADDRESS
 uint8_t broadcastAddress[] = {0x1C, 0xDB, 0xD4, 0x9C, 0x1D, 0xEC};
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 Adafruit_INA219 ina219;
+
+#define maestroSerial Serial2
+#define BLACK_MIN_PULSE_WIDTH 500  // in microseconds
+#define BLACK_MAX_PULSE_WIDTH 2500
+#define BLACK_MAX_ANGLE 180
+
+#define BLUE_MIN_PULSE_WIDTH 850
+#define BLUE_MAX_PULSE_WIDTH 2350
+#define BLUE_MAX_ANGLE 145
+// Blue servos go from 850-2350
+
+int flipped[4] = { 1, 1, -1, -1 }; // Whether motors are flipped wrt each other
+int angle_offset[4] = {-6, 0, 3, 0}; // Angle offsets for the motors
 
 // Structure to match the receiver
 typedef struct struct_message {
@@ -31,6 +47,14 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
+  #ifdef ARDUINO_ARCH_ESP32
+  maestroSerial.begin(9600, SERIAL_8N1, 17, 16);
+#else
+  maestroSerial.begin(9600);
+#endif
+  // Optional: send a test byte to check TX pin
+  maestroSerial.write(0xAA);
+  Serial.println("TX test pulse sent");
 
   if (!bno.begin()) { Serial.println("No BNO055 detected"); while(1); }
   if (!ina219.begin()) { Serial.println("No INA219 detected"); while(1); }
@@ -63,6 +87,35 @@ void loop() {
   myData.current_mA = ina219.getCurrent_mA();
 
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-  
-  delay(100); // 10Hz update rate
+  apply_motor(0,0);
+  apply_motor(1,0);
+  apply_motor(2,0);
+  apply_motor(3,0);
+  delay(10); // 10Hz update rate
+}
+
+/**
+ * @brief Sets the desired motor to the specified angle
+ * 
+ * @param channel Channel number of motor. Even channel for black motors
+ * @param angle Desired angle
+ */
+void apply_motor(int channel, float angle) {
+  int max_width, min_width, max_angle;
+  if (channel % 2 == 0) {
+    min_width = BLACK_MIN_PULSE_WIDTH;
+    max_width = BLACK_MAX_PULSE_WIDTH;
+    max_angle = BLACK_MAX_ANGLE;
+  } else {
+    min_width = BLUE_MIN_PULSE_WIDTH;
+    max_width = BLUE_MAX_PULSE_WIDTH;
+    max_angle = BLUE_MAX_ANGLE;
+  }
+  int pulse_width;
+  float angle_adjusted = max_angle / 2.0 + angle * flipped[channel] + angle_offset[channel];
+  pulse_width = map(angle_adjusted, 0, max_angle, min_width, max_width);
+  Serial.print(pulse_width);
+  Serial.println(", ");
+  pulse_width = constrain(pulse_width, 0, 16383);  // constrain to max values of maestro
+  maestro.setTarget(channel, 4 * pulse_width);     // target is in units of quarter-microseconds
 }
