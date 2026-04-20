@@ -20,6 +20,7 @@ https://github.com/pololu/maestro-arduino for more details on how
 to make the connection between your Arduino and your Maestro. */
 
 #include <PololuMaestro.h>
+#include <math.h>
 
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
@@ -46,7 +47,8 @@ SoftwareSerial maestroSerial(10, 11);
 #define BLUE_MAX_ANGLE 145
 // Blue servos go from 850-2350
 
-int flipped[4] = { 1, 1, -1, -1 };
+int flipped[4] = { 1, 1, -1, -1 }; // Whether motors are flipped wrt each other
+int angle_offset[4] = {-6, 0, 3, 0}; // Angle offsets for the motors
 
 
 /* Next, create a Maestro object using the serial port. 
@@ -60,7 +62,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Starting test...");
 #ifdef ARDUINO_ARCH_ESP32
-  maestroSerial.begin(9600, SERIAL_8N1, 16, 17);
+  maestroSerial.begin(9600, SERIAL_8N1, 17, 16);
 #else
   maestroSerial.begin(9600);
 #endif
@@ -74,41 +76,6 @@ void loop() {
      RC hobby servo responds to pulses between 1 ms (4000) and 2
      ms (8000). */
 
-  // Set the target of channel 0 to 1500 us, and wait 2 seconds.
-  // Serial.print("Moving to 0: ");
-  //apply_motor(0,90);
-  //apply_motor(1,72);
-  // delay(1000);
-  // while (true) {
-  // if (Serial.available() > 0) {
-  //   if (Serial.read() == 'G') {
-  //     break; // Exit the loop only when 'G' is pressed
-  //     }
-  //   }
-  // }
-
-  // // Set the target of channel 0 to 1750 us, and wait 2 seconds.
-  // Serial.print("Moving to max: ");
-  // apply_motor(1,BLUE_MAX_ANGLE);
-  // apply_motor(0,0);
-  // delay(1000);
-  // while (true) {
-  // if (Serial.available() > 0) {
-  //   if (Serial.read() == 'G') {
-  //     break; // Exit the loop only when 'G' is pressed
-  //     }
-  //   }
-  // }
-
-  // // Set the target of channel 0 to 1250 us, and wait 2 seconds.
-  // Serial.print("Moving to 135: ");
-  // apply_motor(1,135);
-  // delay(500);
-  // apply_motor(0,135);
-  // delay(500);
-  // motor_limit(0);
-  // delay(2000);
-  //motor_limit(1);
   flap_wings();
 }
 
@@ -130,10 +97,10 @@ void apply_motor(int channel, float angle) {
     max_angle = BLUE_MAX_ANGLE;
   }
   int pulse_width;
-  float angle_adjusted = max_angle / 2.0 + angle * flipped[channel];
+  float angle_adjusted = max_angle / 2.0 + angle * flipped[channel] + angle_offset[channel];
   pulse_width = map(angle_adjusted, 0, max_angle, min_width, max_width);
   Serial.print(pulse_width);
-  Serial.print(", ");
+  Serial.println(", ");
   pulse_width = constrain(pulse_width, 0, 16383);  // constrain to max values of maestro
   maestro.setTarget(channel, 4 * pulse_width);     // target is in units of quarter-microseconds
 }
@@ -174,4 +141,17 @@ void flap_wings() {
     delay(10);
     Serial.println("");
   }
+}
+
+void figure_eight(){
+  for (int i = 0; i <= 200 * M_PI; i++){
+    float theta1 = M_PI/3.0 * sin(i/100.0);
+    float theta2 = M_PI/3.0 * sin(i/100.0 + M_PI/5.0);
+    apply_motor(0,theta1);
+    apply_motor(1,theta2);
+    apply_motor(2,theta1);
+    apply_motor(3,theta2);
+    delay(5);
+  }
+
 }
