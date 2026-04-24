@@ -48,6 +48,7 @@ SoftwareSerial maestroSerial(10, 11);
 // Blue servos go from 850-2350
 
 int flipped[4] = { 1, 1, -1, -1 }; // Whether motors are flipped wrt each other
+
 int angle_offset[4] = {-6, 0, 3, 0}; // Angle offsets for the motors
 
 
@@ -76,7 +77,7 @@ void loop() {
      RC hobby servo responds to pulses between 1 ms (4000) and 2
      ms (8000). */
 
-  flap_wings();
+  apply_motor(1,45);
 }
 
 /**

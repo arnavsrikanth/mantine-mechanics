@@ -8,7 +8,7 @@ from collections import deque
 # --- Configuration ---
 SERIAL_PORT = 'COM6'  # Change to your port (e.g., '/dev/ttyUSB0' on Linux)
 BAUD_RATE = 115200
-CSV_FILE = "drone_telemetry.csv"
+CSV_FILE = "drone_telemetry_flap2.csv"
 MAX_POINTS = 100  # Number of points to show on plot
 
 # Data buffers

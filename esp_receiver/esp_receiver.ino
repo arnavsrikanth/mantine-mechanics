@@ -29,6 +29,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingDataPtr, int len) {
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
+  delay(100);
 
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error initializing ESP-NOW");
