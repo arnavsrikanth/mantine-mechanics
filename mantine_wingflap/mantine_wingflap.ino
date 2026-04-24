@@ -95,6 +95,7 @@ void loop() {
   }
   float theta1 = angle_data[0][count] * PI * 180.0;
   float theta2 =  angle_data[1][count] * PI * 180.0;
+<<<<<<< HEAD
   // int i = 0;
   // i = count % 90;
   // i -= 45;
@@ -109,6 +110,12 @@ void loop() {
   apply_motor(1,theta2);
   apply_motor(2,theta1);
   apply_motor(3,theta1);
+=======
+  apply_motor(0,theta1);
+  apply_motor(1,theta2);
+  apply_motor(2,theta1);
+  apply_motor(3,theta2);
+>>>>>>> cf85a1a0d23ac57f1d3f999d987f87f39be503cf
   count++;
   delay(10); // 100Hz update rate
 }
@@ -127,8 +134,13 @@ void apply_motor(int channel, float angle) {
   int pulse_width;
   float angle_adjusted = max_angle / 2.0 + angle * flipped[channel] + angle_offset[channel];
   pulse_width = map(angle_adjusted, 0, max_angle, min_width, max_width);
+<<<<<<< HEAD
   //Serial.print(pulse_width);
   //Serial.println(", ");
+=======
+  Serial.print(pulse_width);
+  Serial.println(", ");
+>>>>>>> cf85a1a0d23ac57f1d3f999d987f87f39be503cf
   pulse_width = constrain(pulse_width, 0, 16383);  // constrain to max values of maestro
   maestro.setTarget(channel, 4 * pulse_width);     // target is in units of quarter-microseconds
 }
