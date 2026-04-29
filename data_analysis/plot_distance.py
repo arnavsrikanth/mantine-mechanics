@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Load the processed telemetry files
 # Ensure these files are in your working directory
-df_flap = pd.read_csv('drone_telemetry_flap0_final.csv')
+df_flap = pd.read_csv('drone_telemetry_flap0_test.csv')
 df_prop = pd.read_csv('drone_telemetry_prop0_final.csv')
 
 # Create the plot
@@ -18,9 +18,9 @@ plt.plot(df_prop['Timestamp'], df_prop['Cumulative_Energy_J'],
          label='Propeller Configuration', color='#ff7f0e', linewidth=2)
 
 # Add chart metadata
-plt.title('Comparison of Total Energy Consumed (Joules)', fontsize=14)
-plt.xlabel('Time (seconds)', fontsize=12)
-plt.ylabel('Cumulative Energy (J)', fontsize=12)
+plt.title('Energy Consumption Comparison vs. Time', fontsize=16)
+plt.xlabel('Time (seconds)', fontsize=14)
+plt.ylabel('Cumulative Energy (J)', fontsize=14)
 plt.legend(loc='upper left')
 plt.grid(True, linestyle='--', alpha=0.6)
 
@@ -28,10 +28,16 @@ plt.grid(True, linestyle='--', alpha=0.6)
 final_flap = df_flap['Cumulative_Energy_J'].iloc[-1]
 final_prop = df_prop['Cumulative_Energy_J'].iloc[-1]
 
-plt.text(df_flap['Timestamp'].iloc[-1], final_flap, f' {final_flap:.1f}J', va='center')
-plt.text(df_prop['Timestamp'].iloc[-1], final_prop, f' {final_prop:.1f}J', va='center')
+plt.annotate(f'{final_flap:.1f}J', 
+             xy=(df_flap['Timestamp'].iloc[-1], final_flap),
+             xytext=(-5, -10), textcoords='offset points',
+             ha='right', va='top', fontsize=11)
+plt.annotate(f'{final_prop:.1f}J', 
+             xy=(df_prop['Timestamp'].iloc[-1], final_prop),
+             xytext=(-5, -10), textcoords='offset points',
+             ha='right', va='top', fontsize=11)
 
 # Display and save the plot
 plt.tight_layout()
-plt.savefig('energy_plot.png')
+plt.savefig('energy_plot_test.png')
 plt.show()

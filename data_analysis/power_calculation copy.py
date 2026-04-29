@@ -1,6 +1,8 @@
 import pandas as pd
 
 def process_drone_telemetry_with_relative_time(input_file, output_file):
+    free_avg = 963.0027226
+    
     # 1. Load the dataset
     df = pd.read_csv(input_file)
 
@@ -18,7 +20,7 @@ def process_drone_telemetry_with_relative_time(input_file, output_file):
 
     # 5. Calculate energy consumed in this interval (milliwatt-seconds / millijoules)
     # Energy = Power * Time
-    df['Interval_Energy_mJ'] = df['Power_mW'] * df['dt_seconds']
+    df['Interval_Energy_mJ'] = (df['Power_mW'] * df['dt_seconds']) - free_avg
 
     # 6. Calculate the running total (Cumulative Energy)
     # Fill the last row's NaN (from the shift) with 0 before summing
@@ -35,4 +37,4 @@ def process_drone_telemetry_with_relative_time(input_file, output_file):
     print(f"Total Energy: {df['Cumulative_Energy_J'].iloc[-1]:.2f} Joules")
 
 # Run the script
-process_drone_telemetry_with_relative_time('drone_telemetry_freemotor_relative_time.csv', 'drone_telemetry_freemotor_final.csv')
+process_drone_telemetry_with_relative_time('drone_telemetry_flap0 - Copy.csv', 'drone_telemetry_flap0_test.csv')
