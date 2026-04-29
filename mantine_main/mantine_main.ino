@@ -4,6 +4,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <Adafruit_INA219.h>
+#include <DFRobot_INA219.h>
 
 #include <PololuMaestro.h>
 #include <math.h>
@@ -12,8 +13,20 @@
 uint8_t broadcastAddress[] = {0x1C, 0xDB, 0xD4, 0x9C, 0x1D, 0xEC};
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
-Adafruit_INA219 ina219;
+MicroMaestro maestro(maestroSerial);
+//Adafruit_INA219 ina219;
 int count;
+
+/**
+ * @fn DFRobot_INA219_IIC
+ * @brief pWire I2C controller pointer
+ * @param i2caddr  I2C address
+ * @n INA219_I2C_ADDRESS1  0x40   A0 = 0  A1 = 0
+ * @n INA219_I2C_ADDRESS2  0x41   A0 = 1  A1 = 0
+ * @n INA219_I2C_ADDRESS3  0x44   A0 = 0  A1 = 1
+ * @n INA219_I2C_ADDRESS4  0x45   A0 = 1  A1 = 1	 
+  */
+DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
 
 #define maestroSerial Serial2
 MicroMaestro maestro(maestroSerial);
@@ -60,7 +73,11 @@ void setup() {
   Serial.println("TX test pulse sent");
 
   if (!bno.begin()) { Serial.println("No BNO055 detected"); while(1); }
-  if (!ina219.begin()) { Serial.println("No INA219 detected"); while(1); }
+  while(ina219.begin() != true) {
+        Serial.println("INA219 begin faild");
+        delay(200);
+    }
+  //if (!ina219.begin()) { Serial.println("No INA219 detected"); while(1); }
 
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error initializing ESP-NOW");
